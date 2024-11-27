@@ -1,0 +1,87 @@
+name: aoc2024
+version: 0.1.0.0
+#synopsis:
+#description:
+homepage: https://github.com/githubuser/aoc2023#readme
+license: BSD3
+author: Morten Kolstad
+copyright: 2023 Morten Kolstad
+category: Web
+extra-source-files:
+  - README.md
+
+language: GHC2021
+
+default-extensions:
+  - BinaryLiterals
+  - DerivingVia
+  - ExistentialQuantification
+  - ExplicitForAll
+  - FieldSelectors
+  - MultiWayIf
+  - NamedWildCards
+  - OverloadedStrings
+  - PartialTypeSignatures
+  - ViewPatterns
+  - LambdaCase
+  - PatternSynonyms
+  - QuasiQuotes
+  - StrictData
+  - DataKinds
+  - OverloadedRecordDot
+  - NoFieldSelectors
+
+ghc-options:
+  - -fno-warn-partial-type-signatures
+
+dependencies:
+  - base >= 4.14 && < 5
+  - lens
+  - linear
+  - bytestring
+  - text
+  - stringsearch
+  - megaparsec
+  - transformers
+  - mtl
+  - comonad
+  - containers
+  - ordered-containers
+  - unordered-containers
+  - extra
+  - safe
+  - split
+  - groupBy
+  - memoize
+  - haskell-src-meta
+  - template-haskell
+  - vector
+  - array
+  - digits
+  - fgl
+  - HUnit
+  - lattices
+  - raw-strings-qq
+  - IntervalMap
+  - astar
+  - hashable
+
+library:
+  source-dirs: src/lib
+  when:
+    - condition: false
+      other-modules: Paths_aoc2024
+
+executables:
+  app:
+    source-dirs: src/app
+    main: Main.hs
+    dependencies:
+      - aoc2024
+      - timeit
+      - http-conduit
+      - dotenv
+      - optparse-applicative
+    when:
+      - condition: false
+        other-modules: Paths_app

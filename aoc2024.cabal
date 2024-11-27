@@ -1,0 +1,146 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.37.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           aoc2024
+version:        0.1.0.0
+category:       Web
+homepage:       https://github.com/githubuser/aoc2023#readme
+author:         Morten Kolstad
+maintainer:     Morten Kolstad
+copyright:      2023 Morten Kolstad
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+
+library
+  exposed-modules:
+      Day.Day01
+      Day.DayTemplate
+      DayVersion
+      Letter
+      Solutions
+      Utils
+  hs-source-dirs:
+      src/lib
+  default-extensions:
+      BinaryLiterals
+      DerivingVia
+      ExistentialQuantification
+      ExplicitForAll
+      FieldSelectors
+      MultiWayIf
+      NamedWildCards
+      OverloadedStrings
+      PartialTypeSignatures
+      ViewPatterns
+      LambdaCase
+      PatternSynonyms
+      QuasiQuotes
+      StrictData
+      DataKinds
+      OverloadedRecordDot
+      NoFieldSelectors
+  ghc-options: -fno-warn-partial-type-signatures
+  build-depends:
+      HUnit
+    , IntervalMap
+    , array
+    , astar
+    , base >=4.14 && <5
+    , bytestring
+    , comonad
+    , containers
+    , digits
+    , extra
+    , fgl
+    , groupBy
+    , hashable
+    , haskell-src-meta
+    , lattices
+    , lens
+    , linear
+    , megaparsec
+    , memoize
+    , mtl
+    , ordered-containers
+    , raw-strings-qq
+    , safe
+    , split
+    , stringsearch
+    , template-haskell
+    , text
+    , transformers
+    , unordered-containers
+    , vector
+  default-language: GHC2021
+
+executable app
+  main-is: Main.hs
+  other-modules:
+      CmdArgs
+      Input
+      TimeIt
+      Paths_aoc2024
+  hs-source-dirs:
+      src/app
+  default-extensions:
+      BinaryLiterals
+      DerivingVia
+      ExistentialQuantification
+      ExplicitForAll
+      FieldSelectors
+      MultiWayIf
+      NamedWildCards
+      OverloadedStrings
+      PartialTypeSignatures
+      ViewPatterns
+      LambdaCase
+      PatternSynonyms
+      QuasiQuotes
+      StrictData
+      DataKinds
+      OverloadedRecordDot
+      NoFieldSelectors
+  ghc-options: -fno-warn-partial-type-signatures
+  build-depends:
+      HUnit
+    , IntervalMap
+    , aoc2024
+    , array
+    , astar
+    , base >=4.14 && <5
+    , bytestring
+    , comonad
+    , containers
+    , digits
+    , dotenv
+    , extra
+    , fgl
+    , groupBy
+    , hashable
+    , haskell-src-meta
+    , http-conduit
+    , lattices
+    , lens
+    , linear
+    , megaparsec
+    , memoize
+    , mtl
+    , optparse-applicative
+    , ordered-containers
+    , raw-strings-qq
+    , safe
+    , split
+    , stringsearch
+    , template-haskell
+    , text
+    , timeit
+    , transformers
+    , unordered-containers
+    , vector
+  default-language: GHC2021
