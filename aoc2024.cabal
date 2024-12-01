@@ -85,7 +85,6 @@ executable app
       CmdArgs
       Input
       TimeIt
-      Paths_aoc2024
   hs-source-dirs:
       src/app
   default-extensions:

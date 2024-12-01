@@ -16,7 +16,7 @@
 # a snapshot provided as a file might change, whereas a url resource does not.
 #
 resolver:
-  nightly-2023-11-26
+  lts-22.43
   # resolver: https://example.com/snapshots/2018-01-01.yaml
 
 # User packages to be built.

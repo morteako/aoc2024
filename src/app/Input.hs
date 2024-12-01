@@ -39,13 +39,13 @@ createHeaders = do
 
 makeRequest :: String -> IO Request
 makeRequest day = do
-  let url = "https://adventofcode.com/2023/day/" <> day <> "/input"
+  let url = "https://adventofcode.com/2024/day/" <> day <> "/input"
   print url
   headers <- createHeaders
-  pure
-    $ parseRequest_ url
-    & setRequestMethod "GET"
-    & setRequestHeaders headers
+  pure $
+    parseRequest_ url
+      & setRequestMethod "GET"
+      & setRequestHeaders headers
 
 safeRead :: String -> IO (Maybe String)
 safeRead path = (Just <$> readFile path) `catch` handleExists

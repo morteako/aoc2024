@@ -12,6 +12,8 @@ extra-source-files:
 
 language: GHC2021
 
+spec-version: 0.36.0
+
 default-extensions:
   - BinaryLiterals
   - DerivingVia
