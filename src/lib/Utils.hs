@@ -19,6 +19,15 @@ import Debug.Trace
 import GHC.Base (Semigroup)
 import Linear (V2 (V2))
 
+occurences :: (Ord a) => [a] -> Map a Int
+occurences xs = Map.fromListWith (+) $ map (,1) xs
+
+zipWithNext :: (a -> a -> b) -> [a] -> [b]
+zipWithNext f xs = zipWith f xs (tail xs)
+
+pairs :: [a] -> [(a, a)]
+pairs = zip <*> tail
+
 readInt :: String -> Int
 readInt = read
 
