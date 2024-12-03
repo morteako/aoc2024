@@ -67,6 +67,7 @@ dependencies:
   - IntervalMap
   - astar
   - hashable
+  - lens-regex-pcre
 
 library:
   source-dirs: src/lib

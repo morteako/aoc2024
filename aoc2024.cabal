@@ -21,6 +21,7 @@ library
   exposed-modules:
       Day.Day01
       Day.Day02
+      Day.Day03
       Day.DayTemplate
       DayVersion
       Letter
@@ -64,6 +65,7 @@ library
     , haskell-src-meta
     , lattices
     , lens
+    , lens-regex-pcre
     , linear
     , megaparsec
     , memoize
@@ -127,6 +129,7 @@ executable app
     , http-conduit
     , lattices
     , lens
+    , lens-regex-pcre
     , linear
     , megaparsec
     , memoize
