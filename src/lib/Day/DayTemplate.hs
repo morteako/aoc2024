@@ -4,6 +4,7 @@ import Control.Arrow ((>>>))
 import Control.Lens
 import Control.Monad (void)
 import Data.List
+import Data.Maybe
 import Print
 import Test.HUnit ((@=?))
 import Text.RawString.QQ (r)
