@@ -26,6 +26,7 @@ library
       Day.DayTemplate
       DayVersion
       Letter
+      Print
       Solutions
       Utils
   hs-source-dirs:

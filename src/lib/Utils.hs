@@ -1,15 +1,7 @@
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE FunctionalDependencies #-}
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE TypeData #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE UndecidableInstances #-}
-
 module Utils where
 
 import Control.Lens
 import Data.Foldable (Foldable (foldl'))
-import Data.Kind
 import Data.List.Extra hiding (foldl1')
 import Data.Map (Map)
 import Data.Map qualified as Map
@@ -18,6 +10,7 @@ import Data.Semigroup (Sum (Sum, getSum))
 import Debug.Trace
 import GHC.Base (Semigroup)
 import Linear (V2 (V2))
+import Text.Read (readMaybe)
 
 occurences :: (Ord a) => [a] -> Map a Int
 occurences xs = Map.fromListWith (+) $ map (,1) xs
@@ -27,6 +20,12 @@ zipWithNext f xs = zipWith f xs (tail xs)
 
 pairs :: [a] -> [(a, a)]
 pairs = zip <*> tail
+
+charRead :: (Read s) => Char -> s
+charRead = read . pure
+
+charReadMaybe :: (Read s) => Char -> Maybe s
+charReadMaybe = readMaybe . pure
 
 readInt :: String -> Int
 readInt = read
@@ -96,38 +95,8 @@ parseAsciiMap f = ifoldMapOf (asciiGrid <. folding f) Map.singleton
 
 -- printing
 
-printlab :: (Show a) => [Char] -> a -> IO ()
-printlab s a = putStr (s ++ " ") >> print a
-
-class Print a where
-    mprint :: a -> IO ()
-
-instance Print String where
-    mprint = print
-
-instance {-# INCOHERENT #-} (Show a) => Print [a] where
-    mprint = mapM_ print
-
-instance {-# INCOHERENT #-} (Show a) => Print a where
-    mprint = print
-
-instance {-# INCOHERENT #-} (Show k, Show v) => Print (Map k v) where
-    mprint = mapM_ (putStrLn . (\(k, v) -> show k ++ " => " ++ show v)) . Map.toList
-
 -- makeMap :: [Dot] -> Map.Map (V2 Int) [Label]
 -- makeMap = Map.unionWith (<>) defMap . Map.fromListWith (<>) . fmap (\(Dot l pos) -> (pos, pure l))
-
--- defMap = Map.insertWith (++) 0 [T] $ Map.fromList $ fmap (,[]) xs
---  where
---   xs = V2 <$> [-11 .. 14] <*> [-5 .. 15]
-
---   limU = 5
---   limD = 5
-
--- fp x = case x of
---   [] -> "."
---   [T] -> "s"
---   labs -> show $ minimum labs
 
 -- printMap :: Map.Map (V2 Int) [Label] -> IO ()
 -- printMap m = do
@@ -135,10 +104,6 @@ instance {-# INCOHERENT #-} (Show k, Show v) => Print (Map k v) where
 --   let xs = Map.toList $ Map.mapKeys (\(V2 x y) -> V2 y x) m
 --   let g = groupOn (\(V2 x y, _) -> x) xs
 --   let gg = reverse $ (fmap . concatMap) (fp . snd) g
-
---   mapM_ (print . sort) $ Map.filter (\x -> length x > 1) m
---   mapM_ putStrLn gg
---   putStrLn ""
 
 -- Copied from universe-base
 diagonals :: [[a]] -> [[a]]
