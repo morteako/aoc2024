@@ -1,7 +1,9 @@
 module Day.DayTemplate (run) where
 
 import Control.Arrow ((>>>))
+import Control.Lens
 import Control.Monad (void)
+import Data.List
 import Test.HUnit ((@=?))
 import Text.RawString.QQ (r)
 import Utils

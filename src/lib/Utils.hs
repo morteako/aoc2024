@@ -139,3 +139,14 @@ instance {-# INCOHERENT #-} (Show k, Show v) => Print (Map k v) where
 --   mapM_ (print . sort) $ Map.filter (\x -> length x > 1) m
 --   mapM_ putStrLn gg
 --   putStrLn ""
+
+-- Copied from universe-base
+diagonals :: [[a]] -> [[a]]
+diagonals = tail . go []
+  where
+    go b es_ =
+        [h | h : _ <- b] : case es_ of
+            [] -> transpose ts
+            e : es -> go (e : ts) es
+      where
+        ts = [t | _ : t <- b]

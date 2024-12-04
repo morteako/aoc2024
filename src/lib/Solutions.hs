@@ -5,6 +5,29 @@ import Data.Map qualified as Map
 import Day.Day01 qualified
 import Day.Day02 qualified
 import Day.Day03 qualified
+import Day.Day04 qualified
+
+-- import Day.Day05 qualified
+-- import Day.Day06 qualified
+-- import Day.Day07 qualified
+-- import Day.Day08 qualified
+-- import Day.Day09 qualified
+-- import Day.Day10 qualified
+-- import Day.Day11 qualified
+-- import Day.Day12 qualified
+-- import Day.Day13 qualified
+-- import Day.Day14 qualified
+-- import Day.Day15 qualified
+-- import Day.Day16 qualified
+-- import Day.Day17 qualified
+-- import Day.Day18 qualified
+-- import Day.Day19 qualified
+-- import Day.Day20 qualified
+-- import Day.Day21 qualified
+-- import Day.Day22 qualified
+-- import Day.Day23 qualified
+-- import Day.Day24 qualified
+-- import Day.Day25 qualified
 
 import DayVersion
 import Utils ((=:))
@@ -15,7 +38,7 @@ solutions =
     [ "1" =: Day.Day01.run
     , "2" =: Day.Day02.run
     , "3" =: Day.Day03.run
-    -- , "4" =: Day.Day04.run
+    , "4" =: Day.Day04.run
     -- , "5" =: Day.Day05.run
     -- , "6" =: Day.Day06.run
     -- , "7" =: Day.Day07.run
