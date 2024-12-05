@@ -16,20 +16,19 @@ import Text.RawString.QQ (r)
 import Utils (readInt, toTuple)
 
 parse :: [Char] -> (Map Int (Set Int), [[Int]])
-parse =
-  splitOn "\n\n"
-    >>> map lines
-    >>> toTuple
-    >>> over _1 parseRules
-    >>> over (_2 . each) parseNums
+parse input =
+  (parseRules ruleLines, parseOrders orderLines)
  where
+  [ruleLines, orderLines] =
+    input & splitOn "\n\n" & map lines
+
   parseRules =
     map parseOrderRule
       >>> map (over _2 Set.singleton)
       >>> (Map.fromListWith (<>) >>> expandRuleMap)
 
+  parseOrders = map (splitOn "," >>> map readInt)
   parseOrderRule = splitOn "|" >>> map readInt >>> toTuple
-  parseNums = (splitOn "," >>> map readInt)
 
 expandRuleMap :: Map Int (Set Int) -> Map Int (Set Int)
 expandRuleMap rules = rules & Map.map (\set -> set <> foldMap (\n -> execState (getAllFollowing n) set) set)
