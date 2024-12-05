@@ -18,6 +18,9 @@ occurences xs = Map.fromListWith (+) $ map (,1) xs
 zipWithNext :: (a -> a -> b) -> [a] -> [b]
 zipWithNext f xs = zipWith f xs (tail xs)
 
+toTuple :: [b] -> (b, b)
+toTuple [x, y] = (x, y)
+
 pairs :: [a] -> [(a, a)]
 pairs = zip <*> tail
 
