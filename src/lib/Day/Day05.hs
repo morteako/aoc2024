@@ -25,22 +25,10 @@ parse input =
   parseRules =
     map parseOrderRule
       >>> map (over _2 Set.singleton)
-      >>> (Map.fromListWith (<>) >>> expandRuleMap)
+      >>> (Map.fromListWith (<>) >>> id)
 
   parseOrders = map (splitOn "," >>> map readInt)
   parseOrderRule = splitOn "|" >>> map readInt >>> toTuple
-
-expandRuleMap :: Map Int (Set Int) -> Map Int (Set Int)
-expandRuleMap rules = rules & Map.map (\set -> set <> foldMap (\n -> execState (getAllFollowing n) set) set)
- where
-  getAllFollowing :: Int -> State (Set Int) ()
-  getAllFollowing x =
-    do
-      visited <- get
-      when (Set.notMember x visited) $ do
-        let res = Map.findWithDefault mempty x rules
-        traverse_ getAllFollowing res
-        put (visited <> res)
 
 solveA :: Map Int (Set Int) -> [[Int]] -> Int
 solveA rules orders =

@@ -78,6 +78,20 @@ printV2Map m = do
         $ gg
     putStrLn ""
 
+printV2MapC :: (Ord k) => Map.Map (V2 k) Char -> IO ()
+printV2MapC m = do
+    putStrLn "--------"
+    let xs = Map.toList m
+    let g = groupOn (\(V2 _ y, _) -> y) $ sortOn (\(V2 x y, _) -> V2 y x) xs
+    let gg = fmap (fmap snd) g
+    mapM_
+        ( \x -> do
+            mapM_ (putChar) x
+            putStrLn ""
+        )
+        $ gg
+    putStrLn ""
+
 traceLab :: (Show a) => [Char] -> a -> a
 traceLab s x = trace (s ++ ": " ++ show x) x
 
