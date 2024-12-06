@@ -43,6 +43,9 @@ extra-deps:
   - groupBy-0.1.0.0
   - memoize-1.1.2
   - astar-0.3.0.0
+
+extra-include-dirs:
+  - /opt/homebrew/include/
 # Override default flag values for local packages and extra-deps
 # flags: {}
 
