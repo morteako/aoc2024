@@ -9,7 +9,8 @@ import Day.Day04 qualified
 import Day.Day05 qualified
 import Day.Day06 qualified
 
--- import Day.Day07 qualified
+import Day.Day07 qualified
+
 -- import Day.Day08 qualified
 -- import Day.Day09 qualified
 -- import Day.Day10 qualified
@@ -41,7 +42,7 @@ solutions =
     , "4" =: Day.Day04.run
     , "5" =: Day.Day05.run
     , "6" =: Day.Day06.run
-    -- , "7" =: Day.Day07.run
+    , "7" =: Day.Day07.run
     -- , "8" =: Day.Day08.run
     -- , "9" =: Day.Day09.run
     -- , "10" =: Day.Day10.run
