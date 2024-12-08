@@ -1,28 +1,19 @@
 module Day.Day08 (run) where
 
-import Control.Arrow ((>>>))
-import Control.Lens
+import Control.Lens ((&))
 import Control.Monad (void)
-import Data.List
+import Data.List (sortOn)
 import Data.List.Extra (groupOn)
 import Data.Map qualified as Map
-import Data.Maybe
-import Data.Monoid
 import Data.Set qualified as Set
-import Linear
-import Print
+import Linear (V2)
 import Test.HUnit ((@=?))
 import Text.RawString.QQ (r)
-import Utils
+import Utils (countP, parseAsciiMap)
 
--- data Tile = Dot | Letter Char deriving Show
-
-parse = parseAsciiMap Just
-
-solveA grid = antinodes & Set.fromList & countP (`Map.member` grid)
+countAntinodes :: ((V2 Int -> V2 Int) -> V2 Int -> [V2 Int]) -> Map.Map (V2 Int) Char -> Int
+countAntinodes iterator grid = allPosPairs & foldMap makeAntinodes & countP (`Map.member` grid)
  where
-  antinodes = (allPosPairs & foldMap makeAntinodes)
-
   allPosPairs =
     grid
       & Map.filter (/= '.')
@@ -32,54 +23,24 @@ solveA grid = antinodes & Set.fromList & countP (`Map.member` grid)
       & fmap (fmap fst)
       & concatMap allPairs
 
-  makeAntinodes (c1, c2) = [c1 - v] ++ [c2 + v]
+  makeAntinodes (c1, c2) = createAllValidAntinodes (-v) c1 <> createAllValidAntinodes v c2
    where
     v = c2 - c1
 
-solveB grid = antinodes & Set.fromList & Set.size
- where
-  antinodes = (allPosPairs & foldMap makeAntinodes)
+  createAllValidAntinodes v c = Set.fromList $ takeWhile (`Map.member` grid) $ (iterator (+ v) c)
 
-  allPosPairs =
-    grid
-      & Map.filter (/= '.')
-      & Map.toList
-      & sortOn snd
-      & groupOn snd
-      & fmap (fmap fst)
-      & concatMap allPairs
-
-  makeAntinodes (c1, c2) = f (-v) c1 ++ f v c2
-   where
-    f vv c = takeWhile (`Map.member` grid) $ (iterate (+ vv) c1)
-    v = c2 - c1
-
+allPairs :: [a] -> [(a, a)]
 allPairs [] = []
 allPairs (x : xs) = fmap (x,) xs ++ allPairs xs
 
-testInput =
-  [r|............
-........0...
-.....0......
-.......0....
-....0.......
-......A.....
-............
-............
-........A...
-.........A..
-............
-............
-|]
-
 run :: String -> IO ()
 run input = void $ do
-  let parsed = parse input
+  let grid = parseAsciiMap Just input
 
-  let resA = solveA parsed
+  let resA = countAntinodes (\f x -> [f x]) grid
   print resA
   resA @=? 364
 
-  let resB = solveB parsed
+  let resB = countAntinodes iterate grid
   print resB
   resB @=? 1231
