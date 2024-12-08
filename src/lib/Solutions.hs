@@ -8,6 +8,7 @@ import Day.Day03 qualified
 import Day.Day04 qualified
 import Day.Day05 qualified
 import Day.Day06 qualified
+import Day.Day07Backwards qualified
 
 import Day.Day07 qualified
 
@@ -44,6 +45,7 @@ solutions =
     , "5" =: Day.Day05.run
     , "6" =: Day.Day06.run
     , "7" =: Day.Day07.run
+    , "7Backwards" =: Day.Day07Backwards.run
     , "8" =: Day.Day08.run
     -- , "9" =: Day.Day09.run
     -- , "10" =: Day.Day10.run
