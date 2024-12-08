@@ -13,21 +13,19 @@ import Utils (countP, parseAsciiMap)
 
 countAntinodes :: ((V2 Int -> V2 Int) -> V2 Int -> [V2 Int]) -> Map.Map (V2 Int) Char -> _
 countAntinodes iterator grid = length $ nubOrd $ do
-  ((p1, l1), (p2, l2)) <- grid & Map.filter (/= '.') & Map.toList & allPairs
+  ((p1, l1), (p2, l2)) <- grid & Map.filter (/= '.') & Map.toList & diagonalPairs
 
   guard (l1 == l2)
 
   makeAntinodes p1 p2
  where
-  makeAntinodes c1 c2 = createAllValidAntinodes (-v) c1 <> createAllValidAntinodes v c2
-   where
-    v = c2 - c1
+  makeAntinodes c1 c2 = createAllValidAntinodes (c1 - c2) c1 <> createAllValidAntinodes (c2 - c1) c2
 
   createAllValidAntinodes v c = takeWhile (`Map.member` grid) $ (iterator (+ v) c)
 
-allPairs :: [a] -> [(a, a)]
-allPairs [] = []
-allPairs (x : xs) = fmap (x,) xs ++ allPairs xs
+diagonalPairs :: [a] -> [(a, a)]
+diagonalPairs [] = []
+diagonalPairs (x : xs) = fmap (x,) xs ++ diagonalPairs xs
 
 run :: String -> IO ()
 run input = void $ do
