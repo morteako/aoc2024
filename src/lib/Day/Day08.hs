@@ -1,9 +1,9 @@
 module Day.Day08 (run) where
 
 import Control.Lens ((&))
-import Control.Monad (void)
-import Data.List (sortOn)
-import Data.List.Extra (groupOn)
+import Control.Monad (guard, void)
+import Data.List (nub, sortOn)
+import Data.List.Extra (groupOn, nubOrd)
 import Data.Map qualified as Map
 import Data.Set qualified as Set
 import Linear (V2)
@@ -11,23 +11,19 @@ import Test.HUnit ((@=?))
 import Text.RawString.QQ (r)
 import Utils (countP, parseAsciiMap)
 
-countAntinodes :: ((V2 Int -> V2 Int) -> V2 Int -> [V2 Int]) -> Map.Map (V2 Int) Char -> Int
-countAntinodes iterator grid = allPosPairs & foldMap makeAntinodes & countP (`Map.member` grid)
- where
-  allPosPairs =
-    grid
-      & Map.filter (/= '.')
-      & Map.toList
-      & sortOn snd
-      & groupOn snd
-      & fmap (fmap fst)
-      & concatMap allPairs
+countAntinodes :: ((V2 Int -> V2 Int) -> V2 Int -> [V2 Int]) -> Map.Map (V2 Int) Char -> _
+countAntinodes iterator grid = length $ nubOrd $ do
+  ((p1, l1), (p2, l2)) <- grid & Map.filter (/= '.') & Map.toList & allPairs
 
-  makeAntinodes (c1, c2) = createAllValidAntinodes (-v) c1 <> createAllValidAntinodes v c2
+  guard (l1 == l2)
+
+  makeAntinodes p1 p2
+ where
+  makeAntinodes c1 c2 = createAllValidAntinodes (-v) c1 <> createAllValidAntinodes v c2
    where
     v = c2 - c1
 
-  createAllValidAntinodes v c = Set.fromList $ takeWhile (`Map.member` grid) $ (iterator (+ v) c)
+  createAllValidAntinodes v c = takeWhile (`Map.member` grid) $ (iterator (+ v) c)
 
 allPairs :: [a] -> [(a, a)]
 allPairs [] = []
