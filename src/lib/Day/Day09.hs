@@ -1,8 +1,13 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module Day.Day09 (run) where
 
 import Control.Arrow ((>>>))
 import Control.Lens
 import Control.Monad (void)
+import Control.Monad.Extra (unit)
+import Control.Monad.State
+import Data.Foldable (traverse_)
 import Data.Foldable.Extra (sumOn')
 import Data.IntMap (IntMap)
 import Data.IntMap qualified as IntMap
@@ -34,48 +39,40 @@ getValidSpace spaces (placeIndex, place) =
     | spaceCount >= place.pcount = Just (ind, spaceCount)
     | otherwise = rest
 
-findOne :: IntMap Int -> IntMap [Place] -> IntMap Int -> (Int, Place) -> (IntMap Int, IntMap [Place], IntMap Int)
-findOne movedSpaces res spaces (placeIndex, place) =
-  case getValidSpace spaces (placeIndex, place) of
-    Nothing -> (movedSpaces, res, spaces)
-    Just (spaceInd, spaceCount) ->
-      let
-        updatedRes =
-          res
-            & IntMap.delete placeIndex
-            & IntMap.insertWith (++) spaceInd [place]
+data S = S {_movedSpaces :: IntMap Int, _places :: IntMap [Place], _spaces :: IntMap Int}
+makeLenses ''S
 
-        updatedSpaces =
-          if spaceCount > place.pcount
-            then IntMap.insert spaceInd (spaceCount - place.pcount) spaces
-            else IntMap.delete spaceInd spaces
-
-        updatedMovesSpaces =
-          IntMap.insert placeIndex place.pcount movedSpaces
-       in
-        (updatedMovesSpaces, updatedRes, updatedSpaces)
+findOne :: (Int, Place) -> State S ()
+findOne (placeIndex, place) = do
+  s <- get
+  case getValidSpace s._spaces (placeIndex, place) of
+    Nothing -> pure ()
+    Just (spaceInd, spaceCount) -> do
+      places %= (IntMap.delete placeIndex >>> IntMap.insertWith (++) spaceInd [place])
+      spaces
+        %= ( if spaceCount > place.pcount
+              then IntMap.insert spaceInd (spaceCount - place.pcount)
+              else IntMap.delete spaceInd
+           )
+      movedSpaces %= IntMap.insert placeIndex place.pcount
 
 start :: [Group] -> Int
 start groups = do
-  let indexedGroupMap = zip [0 ..] groups & IntMap.fromList
+  let (places, spaces) = zip [0 ..] groups & IntMap.fromList & IntMap.mapEither toEither
+       where
+        toEither = \case
+          GPlace p -> Left p
+          Space s -> Right s
 
-  let toEither = \case
-        GPlace p -> Left p
-        Space s -> Right s
+  let startState = S{_movedSpaces = IntMap.empty, _places = fmap pure places, _spaces = spaces}
 
-  let (places, spaces) = indexedGroupMap & IntMap.mapEither toEither
+  let resState =
+        traverse_ findOne (IntMap.toDescList places)
+          & flip execState startState
 
-  let revPlaces = IntMap.toDescList places
+  let combSpaces = (resState._movedSpaces <> resState._spaces) & fmap (pure . Space)
 
-  let listPlaces = fmap (: []) places
-
-  let (movedSpaces, resPlaces, resSpaces) =
-        foldl' (\(ms, r, s) ip -> findOne ms r s ip) (IntMap.empty, listPlaces, spaces) revPlaces
-          & over _2 (fmap (fmap GPlace))
-
-  let combSpaces = (movedSpaces <> resSpaces) & fmap ((: []) . Space)
-
-  let orderedGroups = IntMap.unionWith (++) combSpaces resPlaces & fmap reverse & concat
+  let orderedGroups = IntMap.unionWith (++) combSpaces (fmap (fmap GPlace) resState._places) & fmap reverse & concat
 
   let (_, scores) = mapAccumL (\cur space -> (calcScore cur space)) 0 orderedGroups
   sum scores
