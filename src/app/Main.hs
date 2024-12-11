@@ -19,6 +19,7 @@ runner o@Options{day, input} = do
   let lastDayNr :: DayVersion
       lastDayRunnner :: String -> IO ()
       (lastDayNr, lastDayRunnner) = Map.findMax solutions
+  print lastDayNr
   let func :: String -> IO ()
       func i = case day of
         LastDay ->

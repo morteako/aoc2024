@@ -28,6 +28,8 @@ library
       Day.Day07
       Day.Day07Backwards
       Day.Day08
+      Day.Day09
+      Day.Day10
       Day.DayTemplate
       DayVersion
       Letter
@@ -58,13 +60,13 @@ library
   ghc-options: -fno-warn-partial-type-signatures
   build-depends:
       HUnit
-    , IntervalMap
     , array
     , astar
     , base >=4.14 && <5
     , bytestring
     , comonad
     , containers
+    , data-interval
     , digits
     , extra
     , fgl
@@ -119,7 +121,6 @@ executable app
   ghc-options: -fno-warn-partial-type-signatures
   build-depends:
       HUnit
-    , IntervalMap
     , aoc2024
     , array
     , astar
@@ -127,6 +128,7 @@ executable app
     , bytestring
     , comonad
     , containers
+    , data-interval
     , digits
     , dotenv
     , extra

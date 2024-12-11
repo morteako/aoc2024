@@ -64,7 +64,7 @@ dependencies:
   - HUnit
   - lattices
   - raw-strings-qq
-  - IntervalMap
+  - data-interval
   - astar
   - hashable
   - lens-regex-pcre
