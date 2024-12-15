@@ -29,10 +29,12 @@ library
       Day.Day07Backwards
       Day.Day08
       Day.Day09
+      Day.Day1
       Day.Day10
       Day.Day11
       Day.Day12
       Day.Day13
+      Day.Day14
       Day.DayTemplate
       DayVersion
       Letter
@@ -82,6 +84,7 @@ library
     , linear
     , megaparsec
     , memoize
+    , mod
     , mtl
     , ordered-containers
     , raw-strings-qq
@@ -146,6 +149,7 @@ executable app
     , linear
     , megaparsec
     , memoize
+    , mod
     , mtl
     , optparse-applicative
     , ordered-containers
