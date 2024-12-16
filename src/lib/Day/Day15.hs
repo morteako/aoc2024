@@ -1,49 +1,33 @@
 module Day.Day15 (run) where
 
 import Control.Arrow ((>>>))
-import Control.Lens hiding (Empty)
+import Control.Lens (iall, (&))
 import Control.Monad (void)
-import Data.Foldable (for_)
 import Data.Foldable.Extra (sumOn')
-import Data.List
-import Data.List.Split
+import Data.List (foldl')
+import Data.List.Split (splitOn)
 import Data.Map qualified as Map
-import Data.Maybe
+import Data.Maybe (mapMaybe)
 import Data.Set (Set)
 import Data.Set qualified as Set
-import Linear
-import Print
+import Linear (V2 (..))
 import Test.HUnit ((@=?))
-import Text.RawString.QQ (r)
-import Utils
+import Utils qualified
 
-data BoxDir = BL | BR deriving (Eq)
+data WideBox = BL | BR deriving (Eq)
 
-instance Show BoxDir where
-  show BL = "["
-  show BR = "]"
-
-instance Show BB where
-  show BB = "O"
-
-data BB = BB deriving (Eq)
+data SimpleBox = SimpleBox deriving (Eq)
 
 data Tile a = Border | Box a | Empty | Robot deriving (Eq)
 
-data Dir = L | U | R | D deriving (Show, Eq)
+data Dir = L | U | R | D deriving (Eq)
 
-instance (Show a) => Show (Tile a) where
-  show Border = "#"
-  show Empty = "."
-  show (Box x) = show x
-  show Robot = "@"
-
-parse :: [Char] -> (Map.Map (V2 Int) (Tile BB), [Dir])
-parse = splitOn "\n\n" >>> (\[grid, path] -> (parseAsciiMap f grid, mapMaybe g path))
+parse :: [Char] -> (Grid SimpleBox, [Dir])
+parse = splitOn "\n\n" >>> (\[grid, path] -> (Utils.parseAsciiMap f grid, mapMaybe g path))
  where
   f '#' = Just $ Border
   f '@' = Just $ Robot
-  f 'O' = Just $ Box BB
+  f 'O' = Just $ Box SimpleBox
   f '.' = Just $ Empty
   f x = error (show x)
 
@@ -53,215 +37,110 @@ parse = splitOn "\n\n" >>> (\[grid, path] -> (parseAsciiMap f grid, mapMaybe g p
   g 'v' = Just D
   g x = Nothing
 
+move :: V2 Int -> Dir -> V2 Int
 move x L = x + V2 (-1) 0
 move x R = x + V2 1 0
 move x U = x + V2 0 (-1)
 move x D = x + V2 0 1
 
-tryWalk :: (Ord a, Show a) => Map.Map a (Tile BB) -> Tile BB -> [a] -> Maybe (Map.Map a (Tile BB))
-tryWalk grid prev (p : ps) =
-  case Map.lookup p grid of
-    Nothing -> Nothing
-    Just Border -> Nothing
-    Just Empty -> Just $ Map.insert p prev grid
-    Just (Box BB) -> tryWalk (Map.insert p prev grid) (Box BB) ps
-    Just Robot -> error $ show (p, grid)
-
--- walk grid p [] = grid
-walk grid p d =
-  case tryWalk grid Robot (drop 1 $ iterate (flip move d) p) of
-    Nothing -> (p, grid)
-    Just newGrid -> (move p d, Map.insert p Empty newGrid)
-
-iterateWalks grid p [d] = let (pp, ggrid) = walk grid p d in [(ggrid, pp)]
-iterateWalks grid p (d : dirs) = let (pp, ggrid) = walk grid p d in (ggrid, pp) : iterateWalks ggrid pp dirs
-
-calcGps (V2 x y) = x + 100 * y
-
-solveA :: (Map.Map (V2 Int) (Tile BB), [Dir]) -> IO ()
-solveA (startGrid, path) = do
-  let robotStart = Map.filter (== Robot) startGrid & Map.keys & head
-
-  let resGrids = iterateWalks startGrid robotStart path
-
-  mprint startGrid
-  printMap $ startGrid
-
-  -- for_ (zip path resGrids) $ \(d, (g, p)) -> do
-  --   print $ "After " ++ show d
-  --   printMap g
-
-  let (resG, _) = last resGrids
-
-  let gpsScores =
-        resG
-          & Map.filter (== Box BB)
-          & Map.keys
-          & sumOn' calcGps
-
-  print gpsScores
-
 (##) = (,)
 
-widenMap :: Map.Map (V2 Int) (Tile BB) -> Map.Map (V2 Int) (Tile BoxDir)
+type Grid boxDir = Map.Map (V2 Int) (Tile boxDir)
+
+widenMap :: Grid SimpleBox -> Grid WideBox
 widenMap =
   Map.foldMapWithKey
     ( \p t -> case t of
-        Empty -> f p [Empty, Empty]
-        Border -> f p [Border, Border]
-        Robot -> f p [Robot, Empty]
-        Box BB -> f p [Box BL, Box BR]
+        Empty -> f p (Empty, Empty)
+        Border -> f p (Border, Border)
+        Robot -> f p (Robot, Empty)
+        Box SimpleBox -> f p (Box BL, Box BR)
     )
  where
-  f (V2 x y) [a, b] = Map.fromList [V2 (x * 2) y ## a, V2 (x * 2 + 1) y ## b]
+  f (V2 x y) (a, b) = Map.fromList [V2 (x * 2) y ## a, V2 (x * 2 + 1) y ## b]
 
-tryWalkB :: Map.Map (V2 Int) (Tile BoxDir) -> Tile BoxDir -> Dir -> V2 Int -> Maybe (Map.Map (V2 Int) (Tile BoxDir))
-tryWalkB grid prev dir p =
-  case Map.lookup p grid of
-    Nothing -> Nothing
-    Just Border -> Nothing
-    Just Empty -> Just $ Map.insert p prev grid
-    Just (Box boxDir) | elem dir [U, D] -> do
-      let boxGrid = expandGroup dir grid (Map.singleton p $ Box boxDir)
-      let allMoved = boxGrid & Map.keys & map (flip move dir)
+calcGps :: (Num a) => V2 a -> a
+calcGps (V2 x y) = x + 100 * y
 
-      let newGrid = grid & Map.insert p prev -- ALWAYS ROBOT?
-      -- & Map.unionWith (Map.f
-      if all (\cp -> Map.member cp boxGrid || Map.lookup cp grid == Just Empty) allMoved
-        then Nothing -- TODO
-        else Nothing
-    Just (Box boxDir) | otherwise -> tryWalkB (Map.insert p prev grid) (Box boxDir) dir (move p dir)
-    Just Robot ->
-      error "wtfrobot"
+walk :: forall boxDir. (Eq boxDir) => (boxDir -> V2 Int -> Map.Map (V2 Int) (Tile boxDir)) -> (V2 Int, Grid boxDir) -> Dir -> (V2 Int, Grid boxDir)
+walk boxF (pos, grid) dir =
+  case tryWalk grid (move pos dir) of
+    Nothing -> (pos, grid)
+    Just newGrid -> (move pos dir, Map.insert pos Empty newGrid)
+ where
+  tryWalk :: Grid boxDir -> V2 Int -> Maybe (Grid boxDir)
+  tryWalk grid p =
+    case Map.lookup p grid of
+      Nothing -> Nothing
+      Just Border -> Nothing
+      Just Empty -> Just $ Map.insert p Robot grid
+      Just (Box boxDir) -> do
+        let boxGrid = findAllBoxesInDir boxF dir grid (Map.singleton p $ Box boxDir)
+        let allMoved = boxGrid & Map.mapKeys (flip move dir)
+        let newEmpty = Map.difference boxGrid allMoved & fmap (const Empty)
+        if iall (\pos _ -> Map.member pos boxGrid || Map.lookup pos grid == Just Empty) allMoved
+          then Just $ Map.insert p Robot (newEmpty <> allMoved <> grid)
+          else Nothing
+      Just Robot ->
+        error "bug :))"
 
--- case Map.lookup (move p dir) grid of
---   Just (Box boxDir) | elem dir [U, D] -> tryWalkTwo grid dir (getBoxDirps p boxDir) -- & fmap (Map.insert p Empty)
---   _ -> tryWalkB grid Robot dir (move p dir)
-
-getBoxDirps (V2 x y) BR = (V2 (x - 1) y, V2 x y)
-getBoxDirps (V2 x y) BL = (V2 x y, V2 (x + 1) y)
-
--- tryWalkTwo :: Map.Map (V2 Int) (Tile BoxDir) -> Dir -> (V2 Int, V2 Int) -> Maybe (Map.Map (V2 Int) (Tile BoxDir))
--- tryWalkTwo grid dir (pl, pr) =
---   case (Map.lookup pl grid, Map.lookup pr grid) of
---     (Just (Box BL), Just (Box BR)) -> tryWalkTwo (grid & Map.insert pl (Box BL) & Map.insert pr (Box BR)) dir (move pl dir, move pr dir)
---     (Just Empty, Just Empty) -> Just (grid & Map.insert pl (Box BL) & Map.insert pr (Box BR))
---     (Just Robot, _) -> error "Wtf"
---     (_, Just Robot) -> error "Wtf"
---     _ -> Nothing
-
-walkB :: Map.Map (V2 Int) (Tile BoxDir) -> V2 Int -> Dir -> (V2 Int, Map.Map (V2 Int) (Tile BoxDir))
-walkB grid p d =
-  case tryWalkB grid Robot d (move p d) of
-    Nothing -> (p, grid)
-    Just newGrid -> (move p d, Map.insert p Empty newGrid)
-
-iterateWalksB grid p [d] = let (pp, ggrid) = walkB grid p d in [(ggrid, pp)]
-iterateWalksB grid p (d : dirs) = let (pp, ggrid) = walkB grid p d in (ggrid, pp) : iterateWalksB ggrid pp dirs
-
-type WideGrid = Map.Map (V2 Int) (Tile BoxDir)
-
-expandGroup :: Dir -> WideGrid -> WideGrid -> WideGrid
-expandGroup dir grid curs = do
-  let valids = curs <> Map.foldMapWithKey (\k _ -> f k) curs
-  if Map.size valids > Map.size curs
+findAllBoxesInDir :: (boxDir -> V2 Int -> Grid boxDir) -> Dir -> Grid boxDir -> Grid boxDir -> Grid boxDir
+findAllBoxesInDir getBoxes dir grid curs = do
+  let widen = Map.foldMapWithKey (\pos _ -> getBox pos) curs
+  let news = curs <> widen <> Map.foldMapWithKey (\pos _ -> getBox (move pos dir)) widen
+  if Map.size news > Map.size curs
     then
-      expandGroup dir grid valids
+      findAllBoxesInDir getBoxes dir grid news
     else
       curs
  where
-  f p = case Map.lookup (move p dir) grid of
+  getBox p = case Map.lookup p grid of
+    Just (Box boxDir) -> getBoxes boxDir p
     Nothing -> Map.empty
     Just Border -> Map.empty
     Just Empty -> Map.empty
-    Just (Box boxDir) -> let (a, b) = getBoxDirps p boxDir in Map.fromList [a ## Box BR, b ## Box BL]
     Just Robot -> Map.empty
 
-solveB :: (Map.Map (V2 Int) (Tile BB), [Dir]) -> IO ()
-solveB (widenMap -> startGrid, path) = do
-  printMap startGrid
+getNormalBoxes :: SimpleBox -> k -> Map.Map k (Tile SimpleBox)
+getNormalBoxes SimpleBox p = Map.singleton p (Box SimpleBox)
 
-  print "qq"
+getWidenedBoxes :: WideBox -> V2 Int -> Grid WideBox
+getWidenedBoxes boxDir p = let (a, b) = getBoxPoses p boxDir in Map.fromList [a ## Box BL, b ## Box BR]
+ where
+  getBoxPoses (V2 x y) BR = (V2 (x - 1) y, V2 x y)
+  getBoxPoses (V2 x y) BL = (V2 x y, V2 (x + 1) y)
 
+solveA :: (Grid SimpleBox, [Dir]) -> Int
+solveA (startGrid, path) = do
   let robotStart = Map.filter (== Robot) startGrid & Map.keys & head
 
-  let resGrids = iterateWalksB startGrid robotStart path
+  let (_, resG) = foldl' (walk getNormalBoxes) (robotStart, startGrid) path
 
-  mprint startGrid
-  printMap $ startGrid
+  resG
+    & Map.filter (\x -> x == Box SimpleBox)
+    & Map.keys
+    & sumOn' calcGps
 
-  for_ (zip path resGrids) $ \(d, (g, p)) -> do
-    print $ "After " ++ show d
-    printMap g
+solveB :: (Grid SimpleBox, [Dir]) -> Int
+solveB (widenMap -> startGrid, path) = do
+  let robotStart = Map.filter (== Robot) startGrid & Map.keys & head
 
--- printMap $ resGrid
+  let (_, resG) = foldl' (walk getWidenedBoxes) (robotStart, startGrid) path
 
-printMap :: (Show a) => Map.Map (V2 Int) (Tile a) -> IO ()
-printMap = fmap (show >>> head) >>> printV2MapC
-
-testInput =
-  [r|########
-#..O.O.#
-##@.O..#
-#...O..#
-#.#.O..#
-#...O..#
-#......#
-########
-
-<^^>>>vv<v>>v<<
-|]
-
-testInput2 =
-  [r|##########
-#..O..O.O#
-#......O.#
-#.OO..O.O#
-#..O@..O.#
-#O#..O...#
-#O..O..O.#
-#.OO.O.OO#
-#....O...#
-##########
-
-<vv>^<v^>v>^vv^v>v<>v^v<v<^vv<<<^><<><>>v<vvv<>^v^>^<<<><<v<<<v^vv^v>^
-vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
-><>vv>v^v^<>><>>>><^^>vv>v<^^^>>v^v^<^^>v^^>v^<^v>v<>>v^v^<v>v^^<^^vv<
-<<v<^>>^^^^>>>v^<>vvv^><v<<<>^^^vv^<vvv>^>v<^^^^v<>^>vvvv><>>v^<<^^^^^
-^><^><>>><>^^<<^^v>>><^<v>^<vv>>v>>>^v><>^v><<<<v>>v<v<v>vvv>^<><<>^><
-^>><>^v<><^vvv<^^<><v<<<<<><^v<<<><<<^^<v<^^^><^>>^<v^><<<^>>^v<v^v<v^
->^>>^v>vv>^<<^v<>><<><<v<<v><>v<^vv<<<>^^v^>^^>>><<^v>>v^v><^^>>^<>vv^
-<><^^>^^^<><vvvvv^v<v<<>^v<v>v<<^><<><<><<<^^<<<^<<>><<><^^^>^^<>^>v<>
-^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
-v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^|]
-
-testInput3 =
-  [r|#######
-#...#.#
-#.....#
-#..OO@#
-#..O..#
-#.....#
-#######
-
-<vv<<^^<<^^|]
+  resG
+    & Map.filter (\x -> x == Box BL)
+    & Map.keys
+    & sumOn' calcGps
 
 run :: String -> IO ()
 run input = void $ do
-  input <- putStrLn "#####    testInput   #####" >> pure testInput3
-  -- print input
   let parsed = parse input
-  -- mprint parsed
-  -- let parsedB = parseWiden input
 
-  -- solveA parsed
+  let resA = solveA parsed
+  print resA
+  resA @=? 1478649
 
-  solveB parsed
+  let resB = solveB parsed
+  print resB
 
--- let resA = solveA parsed
--- mprint resA
-
--- resA @=? 1715
--- let resB = solveB parsed
--- print resB
--- resB @=? 1739
+  resB @=? 1495455

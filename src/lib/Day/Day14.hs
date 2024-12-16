@@ -55,8 +55,6 @@ findChristmasTreeMess robots = do
   let moved = iterate (fmap moveRobot) robots
   let countQuadrants c = fromListOnWith (const 1) (+) $ mapMaybe toQuadrant c
 
-  let countNothings c = length $ filter (== Nothing) $ map toQuadrant c
-
   let getXCount = map (\(Robot p _) -> view _x p) >>> sort >>> group >>> fmap length >>> maximum
 
   let limit = 1000
