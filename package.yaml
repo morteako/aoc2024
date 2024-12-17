@@ -69,6 +69,7 @@ dependencies:
   - hashable
   - lens-regex-pcre
   - mod
+  - pqueue
 
 library:
   source-dirs: src/lib

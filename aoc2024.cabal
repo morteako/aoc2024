@@ -35,6 +35,7 @@ library
       Day.Day13
       Day.Day14
       Day.Day15
+      Day.Day16
       Day.DayTemplate
       DayVersion
       Letter
@@ -87,6 +88,7 @@ library
     , mod
     , mtl
     , ordered-containers
+    , pqueue
     , raw-strings-qq
     , safe
     , split
@@ -153,6 +155,7 @@ executable app
     , mtl
     , optparse-applicative
     , ordered-containers
+    , pqueue
     , raw-strings-qq
     , safe
     , split
