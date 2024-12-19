@@ -45,6 +45,7 @@ library
       Map
       Print
       Solutions
+      Trace
       Utils
   hs-source-dirs:
       src/lib

@@ -92,12 +92,6 @@ printV2MapC m = do
         $ gg
     putStrLn ""
 
-traceLab :: (Show a) => [Char] -> a -> a
-traceLab s x = trace (s ++ ": " ++ show x) x
-
-traceOn :: (Show a) => (a -> [Char]) -> a -> a
-traceOn f x = trace (f x) x
-
 (.?) :: (Show t1) => (t2 -> t1) -> (t1 -> t3) -> t2 -> t3
 (.?) f g = \x -> g $ traceShowId (f x)
 

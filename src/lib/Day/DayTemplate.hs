@@ -8,6 +8,7 @@ import Data.Maybe
 import Print
 import Test.HUnit ((@=?))
 import Text.RawString.QQ (r)
+import Trace
 import Utils
 
 parse = id
