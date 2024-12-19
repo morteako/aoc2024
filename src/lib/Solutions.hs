@@ -33,7 +33,8 @@ import Day.Day16 qualified
 import Day.Day17 qualified
 import Day.Day18 qualified
 
--- import Day.Day19 qualified
+import Day.Day19 qualified
+
 -- import Day.Day20 qualified
 -- import Day.Day21 qualified
 -- import Day.Day22 qualified
@@ -66,6 +67,7 @@ solutions =
     , "16" =: Day.Day16.run
     , "17" =: Day.Day17.run
     , "18" =: Day.Day18.run
+    , "19" =: Day.Day19.run
     -- , "20" =: Day.Day20.run
     -- , "21" =: Day.Day21.run
     -- , "22" =: Day.Day22.run

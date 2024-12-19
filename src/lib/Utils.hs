@@ -132,3 +132,15 @@ diagonals = tail . go []
             e : es -> go (e : ts) es
       where
         ts = [t | _ : t <- b]
+
+apply1 :: (a -> b) -> [a] -> b
+apply1 f [a] = f a
+apply1 f xs = error $ "apply1: " ++ show (fmap (const ()) xs)
+
+apply2 :: (a -> a -> b) -> [a] -> b
+apply2 f [a, b] = f a b
+apply2 f xs = error $ "apply2: " ++ show (fmap (const ()) xs)
+
+apply3 :: (a -> a -> a -> b) -> [a] -> b
+apply3 f [a, b, c] = f a b c
+apply3 f xs = error $ "apply3: " ++ show (fmap (const ()) xs)

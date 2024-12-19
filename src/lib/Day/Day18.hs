@@ -12,12 +12,12 @@ import Data.Set qualified as Set
 import Linear (V2 (..))
 import Test.HUnit ((@=?))
 import Text.RawString.QQ (r)
-import Utils (readInt)
+import Utils (apply2, readInt)
 
 parse :: String -> [V2 Int]
 parse = dots
  where
-  dots = lines >>> map (splitOn "," >>> \[a, b] -> readInt <$> V2 a b)
+  dots = lines >>> map (splitOn "," >>> apply2 V2 >>> fmap readInt)
 
 solveA :: Int -> Int -> [V2 Int] -> Int
 solveA limit numBytes bytes = do

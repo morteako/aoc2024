@@ -70,6 +70,7 @@ dependencies:
   - lens-regex-pcre
   - mod
   - pqueue
+  - bytestring-trie
 
 library:
   source-dirs: src/lib
