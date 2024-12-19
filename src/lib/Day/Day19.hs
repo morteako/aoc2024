@@ -41,7 +41,7 @@ run :: String -> IO ()
 run input = void $ do
   let (patterns, designs) = parse input
 
-  let trie = Trie.fromList $ map (\bs -> (bs, BS.length bs)) patterns
+  let trie = Trie.fromList $ map (,()) patterns
 
   let combCounts = evalState (traverse (countCombs trie) designs) (HashMap.singleton "" 1)
 
