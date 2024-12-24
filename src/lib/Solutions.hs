@@ -39,7 +39,8 @@ import Day.Day20 qualified
 
 -- import Day.Day21 qualified
 -- import Day.Day22 qualified
--- import Day.Day23 qualified
+import Day.Day23 qualified
+
 -- import Day.Day24 qualified
 -- import Day.Day25 qualified
 
@@ -70,7 +71,8 @@ solutions =
     , "18" =: Day.Day18.run
     , "19" =: Day.Day19.run
     , "20" =: Day.Day20.run
-    -- , "21" =: Day.Day21.run
-    -- , "22" =: Day.Day22.run
-    -- , "25" =: Day.Day25.run
+    , -- , "21" =: Day.Day21.run
+      -- , "22" =: Day.Day22.run
+      "23" =: Day.Day23.run
+      -- , "25" =: Day.Day25.run
     ]

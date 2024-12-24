@@ -39,6 +39,8 @@ library
       Day.Day17
       Day.Day18
       Day.Day19
+      Day.Day20
+      Day.Day23
       Day.DayTemplate
       DayVersion
       Letter
