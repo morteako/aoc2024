@@ -5,7 +5,7 @@ module Print where
 import Data.Map as Map
 
 printlab :: (Show a) => [Char] -> a -> IO ()
-printlab s a = putStr (s ++ " ") >> print a
+printlab s a = putStr ("\ESC[91m" ++ s ++ "\ESC[0m ") >> print a
 
 class Print a where
     mprint :: a -> IO ()
