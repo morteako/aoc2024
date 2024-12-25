@@ -29,9 +29,10 @@ solveB nums = do
         num <- nums
         let secrets = iterate secretNumber num & map (flip mod 10)
         let seqs = secrets & diffs & divvy 4 1
-        pure $ Map.fromListWith (\_new old -> old) $ take numIterations $ flip zip (drop 4 secrets) seqs
+        pure $ Map.fromListWith (\_new old -> old) $ take numIterations $ zip seqs (drop 4 secrets)
   maximum $ Map.unionsWith (+) maps
 
+diffs :: [Int] -> [Int]
 diffs xs = zipWith subtract xs (tail xs)
 
 run :: String -> IO ()
